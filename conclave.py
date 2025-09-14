@@ -1,25 +1,31 @@
 import asyncio
 import aiohttp
 import json
-import os
-from dotenv import load_dotenv
 from typing import Dict, Any
 from dataclasses import dataclass
 from datetime import datetime
+import os
 
 @dataclass
 class AIResponse:
     model: str
     content: str
     timestamp: datetime
-load_dotenv()
 
 class ConclaveAI:
     def __init__(self):
-        # Use environment variable for API key
-        self.openrouter_api_key = os.getenv('OPENROUTER_API_KEY', 'your-fallback-key')
+        # 🔐 Load API key from environment variable
+        self.openrouter_api_key = os.getenv('OPENROUTER_API_KEY')
+        
+        # 🚨 Check if API key exists
+        if not self.openrouter_api_key:
+            print("❌ ERROR: OPENROUTER_API_KEY environment variable not found!")
+            print("Please set your API key in the environment variables.")
+        else:
+            print("✅ API key loaded successfully")
+            
         self.openrouter_endpoint = 'https://openrouter.ai/api/v1/chat/completions'
-        # ... rest of your code
+        
         self.models = {
             'chatgpt': {
                 'model': 'openai/gpt-4o',
@@ -42,10 +48,14 @@ class ConclaveAI:
         }
 
     async def query_model(self, model_name: str, prompt: str) -> str:
+        # 🚨 Check if API key is available
+        if not self.openrouter_api_key:
+            return f"{model_name.upper()} Error: API key not configured"
+            
         headers = {
             'Authorization': f'Bearer {self.openrouter_api_key}',
             'Content-Type': 'application/json',
-            'HTTP-Referer': 'https://conclave-ai.local',
+            'HTTP-Referer': 'https://conclave-ai.onrender.com',  # Update with your actual domain
             'X-Title': 'Conclave AI Debate Platform'
         }
         
@@ -69,12 +79,15 @@ class ConclaveAI:
                         return data['choices'][0]['message']['content']
                     else:
                         error_text = await response.text()
+                        print(f"❌ {model_name.upper()} API Error {response.status}: {error_text}")
                         return f"{model_name.upper()} Error {response.status}: {error_text}"
         except Exception as e:
+            print(f"❌ {model_name.upper()} Connection Error: {str(e)}")
             return f"{model_name.upper()} Connection Error: {str(e)}"
 
     async def run_conclave_debate(self, question: str) -> Dict[str, Any]:
         print(f"🔹 Question: {question}\n")
+        print(f"🔑 API Key Status: {'✅ Configured' if self.openrouter_api_key else '❌ Missing'}")
         
         # Phase 1: Initial perspectives
         print("=" * 60)
