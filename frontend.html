@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conclave AI - Multi-Model Debate Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 219, 226, 0.1) 0%, transparent 50%);
+            min-height: 100vh;
+            color: #e5e7eb;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ffffff 0%, #a855f7 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #9ca3af;
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+
+        .ai-badges {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .ai-badge {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 8px 20px;
+            color: #d1d5db;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .ai-badge:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+        }
+
+        .ai-badge:hover::before {
+            left: 100%;
+        }
+
+        .main-panel {
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #a855f7, #06b6d4, transparent);
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-label::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #a855f7, #06b6d4);
+            border-radius: 2px;
+        }
+
+        .question-input {
+            width: 100%;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(0,0,0,0.3);
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+            color: #f3f4f6;
+        }
+
+        .question-input::placeholder {
+            color: #6b7280;
+        }
+
+        .question-input:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 
+                0 0 0 1px #a855f7,
+                0 4px 20px rgba(168, 85, 247, 0.1);
+            background: rgba(0,0,0,0.4);
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 16px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 20px auto 0;
+            position: relative;
+            overflow: hidden;
+            min-width: 200px;
+        }
+
+        .analyze-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .analyze-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(75, 85, 99, 0.4);
+        }
+
+        .analyze-btn:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-top: 2px solid #a855f7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #a855f7;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        .results-section {
+            display: none;
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .consensus-card {
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(31, 41, 55, 0.9) 100%);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .consensus-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, #a855f7, #06b6d4);
+        }
+
+        .consensus-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .consensus-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #a855f7, #06b6d4);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .consensus-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #f3f4f6;
+        }
+
+        .consensus-content {
+            line-height: 1.7;
+            color: #d1d5db;
+            font-size: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .powered-by {
+            margin-top: 24px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 16px;
+        }
+
+        .new-question-btn {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px auto 0;
+            display: block;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .new-question-btn:hover {
+            background: linear-gradient(135deg, #047857 0%, #059669 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .examples {
+            margin-top: 24px;
+            padding: 24px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .examples h3 {
+            color: #f3f4f6;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .example-question {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #d1d5db;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        .example-question:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(168, 85, 247, 0.3);
+            color: #f3f4f6;
+            transform: translateX(4px);
+        }
+
+        /* Scrollbar styling for dark theme */
+        .question-input::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .question-input::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+        }
+
+        .question-input::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+
+        .question-input::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .main-panel {
+                padding: 25px;
+                margin: 10px;
+            }
+            
+            .ai-badges {
+                gap: 12px;
+            }
+            
+            .ai-badge {
+                padding: 6px 14px;
+                font-size: 0.85rem;
+            }
+
+            .analyze-btn {
+                padding: 14px 28px;
+                font-size: 0.95rem;
+            }
+        }
+
+        /* Subtle animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Glowing effect for active elements */
+        .question-input:focus,
+        .analyze-btn:hover:not(:disabled) {
+            box-shadow: 
+                0 0 20px rgba(168, 85, 247, 0.2),
+                0 0 40px rgba(168, 85, 247, 0.1);
+        }
+
+        /* Professional status indicator */
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Conclave AI</h1>
+            <p>Advanced multi-model AI collaboration platform for complex problem solving</p>
+            
+            <div class="ai-badges">
+                <div class="ai-badge">
+                    <span class="status-indicator"></span>
+                    ChatGPT
+                </div>
+                <div class="ai-badge">
+                    <span class="status-indicator"></span>
+                    Gemini
+                </div>
+                <div class="ai-badge">
+                    <span class="status-indicator"></span>
+                    Claude
+                </div>
+            </div>
+
+            <div class="examples">
+                <h3>Example Queries</h3>
+                <div class="example-question" onclick="setQuestion('What is the most effective approach to combat climate change while maintaining economic growth?')">
+                    What is the most effective approach to combat climate change while maintaining economic growth?
+                </div>
+                <div class="example-question" onclick="setQuestion('How can artificial intelligence be developed safely while maximizing its benefits?')">
+                    How can artificial intelligence be developed safely while maximizing its benefits?
+                </div>
+                <div class="example-question" onclick="setQuestion('What are the best strategies for reducing global inequality?')">
+                    What are the best strategies for reducing global inequality?
+                </div>
+            </div>
+        </div>
+
+        <div class="main-panel">
+            <div class="input-section">
+                <div class="input-label">Submit Query for Multi-Model Analysis</div>
+                <textarea 
+                    id="questionInput" 
+                    class="question-input" 
+                    placeholder="Enter your complex question or problem statement here. Our AI models will collaborate to provide comprehensive analysis and solutions."
+                ></textarea>
+                <button class="analyze-btn" onclick="analyzeQuestion()" id="analyzeBtn">
+                    Initiate Analysis
+                </button>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <div class="loading-text">Processing collaborative analysis...</div>
+            </div>
+
+            <div class="results-section" id="resultsSection">
+                <div class="consensus-card">
+                    <div class="consensus-header">
+                        <div class="consensus-icon">AI</div>
+                        <div class="consensus-title">Collaborative Analysis Result</div>
+                    </div>
+                    <div class="consensus-content" id="consensusContent"></div>
+                    <div class="powered-by">
+                        Generated through ChatGPT, Gemini, and Claude collaboration
+                    </div>
+                </div>
+                <button class="new-question-btn" onclick="resetForm()">
+                    New Analysis
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setQuestion(question) {
+            document.getElementById('questionInput').value = question;
+            document.getElementById('questionInput').focus();
+        }
+
+        function resetForm() {
+            document.getElementById('questionInput').value = '';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = false;
+            document.getElementById('analyzeBtn').textContent = 'Initiate Analysis';
+            document.getElementById('questionInput').focus();
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        async function analyzeQuestion() {
+            const question = document.getElementById('questionInput').value.trim();
+            
+            if (!question) {
+                showError('Please enter a question before initiating analysis.');
+                return;
+            }
+
+            if (question.length < 10) {
+                showError('Please provide a more detailed question for optimal analysis.');
+                return;
+            }
+
+            // Hide previous results and errors
+            document.getElementById('resultsSection').style.display = 'none';
+            hideError();
+
+            // Show loading state
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('analyzeBtn').disabled = true;
+            document.getElementById('analyzeBtn').textContent = 'Processing...';
+
+            try {
+                // Integration point for backend API
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        question: question,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || `Analysis failed with status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                // Hide loading
+                document.getElementById('loadingSpinner').style.display = 'none';
+                
+                // Show results
+                document.getElementById('consensusContent').textContent = result.consensus || result.analysis || 'Analysis completed successfully.';
+                document.getElementById('resultsSection').style.display = 'block';
+                
+                // Reset button
+                document.getElementById('analyzeBtn').disabled = false;
+                document.getElementById('analyzeBtn').textContent = 'Initiate Analysis';
+
+                // Smooth scroll to results
+                document.getElementById('resultsSection').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+
+            } catch (error) {
+                console.error('Analysis Error:', error);
+                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('analyzeBtn').disabled = false;
+                document.getElementById('analyzeBtn').textContent = 'Initiate Analysis';
+                showError(`Analysis failed: ${error.message}. Please verify your backend connection and try again.`);
+            }
+        }
+
+        // Enhanced keyboard controls
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.getElementById('questionInput');
+            
+            textarea.addEventListener('keydown', function(e) {
+                // Submit on Enter (allow Shift+Enter for new lines)
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    analyzeQuestion();
+                }
+                
+                // Clear on Escape
+                if (e.key === 'Escape') {
+                    resetForm();
+                }
+            });
+
+            // Auto-focus on input
+            textarea.focus();
+
+            // Auto-resize textarea
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.max(120, this.scrollHeight) + 'px';
+            });
+        });
+
+        // Add subtle background animation
+        document.addEventListener('mousemove', function(e) {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            document.body.style.backgroundPosition = `${x * 20}px ${y * 20}px`;
+        });
+    </script>
+</body>
+</html>
